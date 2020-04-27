@@ -15,6 +15,7 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.data.redis.RedisAutoConfiguration;
+import org.springframework.boot.autoconfigure.data.redis.RedisProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -33,6 +34,9 @@ public class CaffeineRedisCacheAutoConfigure {
 
     @Autowired
     private CacheCaffeineRedisProperties config;
+
+    @Autowired
+    private RedisProperties redisProperties;
 
     @Autowired
     private RedisConnectionFactory redisConnectionFactory;
@@ -87,6 +91,8 @@ public class CaffeineRedisCacheAutoConfigure {
 
         RedisMessageListenerContainer redisMessageListenerContainer = new RedisMessageListenerContainer();
         redisMessageListenerContainer.setConnectionFactory(redisTemplate.getConnectionFactory());
+
+        // 监听主动删除
         ClearLocalCacheMessageListener clearLocalCacheMessageListener = new ClearLocalCacheMessageListener(redisTemplate, redisCaffeineCacheManager);
         redisMessageListenerContainer.addMessageListener(clearLocalCacheMessageListener, new ChannelTopic(config.getRedis().getClearLocalTopic()));
         return redisMessageListenerContainer;
